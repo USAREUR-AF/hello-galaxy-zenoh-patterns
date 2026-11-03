@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# hello-zenoh — run a Zenoh-pattern demonstration.
+#
+#   bin/hello-zenoh <pattern> [--env <context>] [args...]
+#   bin/hello-zenoh list
+#   bin/hello-zenoh all [--env ...]      run every pattern in order
+#
+# Thin dispatcher: resolves the pattern folder and execs its run.sh, passing the
+# chosen environment through. All the logic lives in the pattern drivers and
+# lib/hello-zenoh.sh.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PAT_DIR="$ROOT/patterns"
+
+usage() {
+  cat <<EOF
+hello-galaxy: Zenoh patterns — runnable best-practice demonstrations
+
+usage:
+  bin/hello-zenoh <pattern> [--env <context>] [args...]
+  bin/hello-zenoh list
+  bin/hello-zenoh all  [--env ...]      run every pattern in order
+
+patterns (read docs/decision-guide.md to pick; run in order the first time):
+EOF
+  for d in "$PAT_DIR"/*/; do
+    name="$(basename "$d")"
+    title="$(sed -n 's/^# *//p' "$d/README.md" 2>/dev/null | head -1)"
+    printf '  %-22s %s\n' "$name" "$title"
+  done
+  cat <<EOF
+
+env:
+  --env <context>   a goat context (default: the active one)
+
+examples:
+  bin/hello-zenoh A-singleton-latest
+  bin/hello-zenoh B --env my-goatnet
+EOF
+}
+
+resolve() {  # accept "A", "A-singleton-latest", "singleton" — return the folder name
+  local q="$1" match
+  if [ -d "$PAT_DIR/$q" ]; then echo "$q"; return 0; fi
+  local lq; lq="$(printf '%s' "$q" | tr '[:upper:]' '[:lower:]')"
+  for d in "$PAT_DIR"/*/; do        # prefix match first ("A" -> A-singleton-latest)
+    match="$(basename "$d")"
+    case "$(printf '%s' "$match" | tr '[:upper:]' '[:lower:]')" in "$lq"-*) echo "$match"; return 0 ;; esac
+  done
+  for d in "$PAT_DIR"/*/; do        # then substring ("singleton")
+    match="$(basename "$d")"
+    case "$(printf '%s' "$match" | tr '[:upper:]' '[:lower:]')" in *"$lq"*) echo "$match"; return 0 ;; esac
+  done
+  return 1
+}
+
+[ "$#" -eq 0 ] && { usage; exit 0; }
+
+case "$1" in
+  -h|--help|help) usage; exit 0 ;;
+  list) for d in "$PAT_DIR"/*/; do basename "$d"; done; exit 0 ;;
+  all)
+    shift
+    rc=0
+    for d in "$PAT_DIR"/*/; do
+      name="$(basename "$d")"
+      [ -f "$d/run.sh" ] || continue   # a folder without run.sh is read-only material
+      echo; echo "######## $name ########"
+      bash "$d/run.sh" "$@" || rc=1
+    done
+    exit "$rc"
+    ;;
+esac
+
+pattern="$1"; shift
+folder="$(resolve "$pattern")" || { echo "unknown pattern: $pattern" >&2; echo >&2; usage >&2; exit 2; }
+run="$PAT_DIR/$folder/run.sh"
+[ -f "$run" ] || { echo "pattern '$folder' has no run.sh" >&2; exit 2; }
+exec bash "$run" "$@"

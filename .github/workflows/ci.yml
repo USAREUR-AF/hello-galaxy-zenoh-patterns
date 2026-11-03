@@ -1,0 +1,32 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline:
+    name: scripts lint and the priority probe passes offline
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: shellcheck the drivers
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          shellcheck -x -S warning lib/hello-zenoh.sh bin/hello-zenoh patterns/*/run.sh
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: control-priority probe (local loopback only)
+        working-directory: patterns/control-priority
+        run: |
+          python -m pip install --quiet eclipse-zenoh==1.9.0
+          python test_probe.py
