@@ -57,11 +57,13 @@ last-segment-folding inspection tools and muddles migration — see
 
 ## What the demo shows
 
-It publishes current state for **three** distinct entities to **three** keys
-that share a prefix and differ only in the last segment. Then it reads back
-**one** entity by its exact key (precise selection), and subscribes to the
-`.../*` key expression to show the whole set is addressable as a group — without
-any per-message topic.
+It opens two live subscriptions first: one on **one** entity's exact key
+(precise selection) and one on the `.../*` key expression (the whole set). Then it
+publishes current state for **three** distinct entities to **three** keys that share
+a prefix and differ only in the last segment. The exact-key subscription receives
+only A7; the `.../*` subscription receives all three — addressed as a group without
+any per-message topic. A live subscription is something any participant may open, so
+the demo runs the same for every participant on a goatnet.
 
 ## Run it
 

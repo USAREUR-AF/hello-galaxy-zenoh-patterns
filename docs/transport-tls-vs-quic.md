@@ -20,7 +20,7 @@ profile's `tls/` endpoint), the runnable pattern
 [`patterns/transport-tls-vs-quic/`](../patterns/transport-tls-vs-quic/) uses a
 tiny zenoh client directly: your own context cert, the same pub→sub round-trip,
 once over each transport, and prints each leg's connect time so you can compare
-them on your own goatnet.
+them on the goatnet you are using.
 
 ```
 bin/hello-zenoh transport-tls-vs-quic          # needs eclipse-zenoh==1.9.0

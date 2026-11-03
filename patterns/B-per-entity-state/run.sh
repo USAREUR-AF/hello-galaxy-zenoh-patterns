@@ -16,36 +16,40 @@ hz_step "The key shape — version in the prefix, entity id LAST"
 hz_note "$PREFIX/<entity-id>"
 hz_say  "Three aircraft become three keys that differ only in the last segment."
 
+hz_step "Subscribe live BEFORE publishing — one exact key, and the whole group"
+hz_cmd  "goat sub $PREFIX/A7 --count 1 --for 45s     # ONE entity, by its exact key"
+hz_cmd  "goat sub '$PREFIX/*' --count 3 --for 45s    # ALL entities ( * = one segment )"
+hz_sub_start "$PREFIX/A7" 1 one
+hz_sub_start "$PREFIX/*"  3 all
+hz_say  "A live subscription is what any participant may open. It sees what is"
+hz_say  "published while it is open, so it starts first."
+
 hz_step "Publish current state for three distinct entities"
 for id in A7 A8 A9; do
   KEY="$PREFIX/$id"
-  hz_cmd "goat pub $KEY --payload '{\"id\":\"$id\",\"run\":\"$RUN\"}' --confirm"
-  hz_goat pub "$KEY" --payload "{\"id\":\"$id\",\"alt\":31000,\"run\":\"$RUN\"}" --encoding json --confirm >/dev/null 2>&1 \
-    && hz_note "landed: $KEY" \
-    || hz_note "write not confirmed for $KEY (check write-ACL for your anchor)"
+  hz_cmd "goat pub $KEY --payload '{\"id\":\"$id\",\"run\":\"$RUN\"}'"
+  hz_goat pub "$KEY" --payload "{\"id\":\"$id\",\"alt\":31000,\"run\":\"$RUN\"}" --encoding json >/dev/null 2>&1 \
+    && hz_note "published: $KEY" \
+    || hz_note "publish refused for $KEY (check write-ACL for your anchor)"
 done
 
-hz_step "Let the audit-tail ingest before reading it back"
-hz_settle 10
-
-hz_step "Select ONE entity by its exact key"
-hz_cmd  "goat sub $PREFIX/A7 --since 10m"
-ONE="$(hz_goat sub "$PREFIX/A7" --since 10m 2>&1 || true)"
-printf '%s\n' "$ONE" | sed 's/^/    /'
+hz_step "What each subscription received"
+hz_sub_wait
+ONE="$(hz_sub_output one)"
+ALL="$(hz_sub_output all)"
+hz_note "exact key $PREFIX/A7:"
+printf '%s\n' "$ONE" | sed 's/^/      /'
 hz_say  "Exactly aircraft A7 — the id is a key segment, so the network selects it."
-
-hz_step "Select ALL entities with a key expression ( * = one segment )"
-hz_cmd  "goat sub $PREFIX/* --since 10m"
-ALL="$(hz_goat sub "$PREFIX/*" --since 10m 2>&1 || true)"
-printf '%s\n' "$ALL" | sed 's/^/    /'
+hz_note "key expression $PREFIX/*:"
+printf '%s\n' "$ALL" | sed 's/^/      /'
 hz_say  "All three aircraft, addressed as a group — with NO per-message topic."
-hz_note "Read-back here uses the audit-tail (operator-gated on a goatnet). The ungated"
-hz_note "equivalent for any participant is a live: goat sub $PREFIX/* --follow"
+hz_note "Reading the same keys back after the fact (goat sub ... --since) reads the"
+hz_note "audit-tail, which is operator-gated on a goatnet; Pattern C covers history."
 
 # --- assertions -------------------------------------------------------------
 hz_step "Verify"
-hz_assert_contains "single-key select returned this run's A7" "$ONE" "$RUN"
-hz_assert_contains "wildcard select saw aircraft A7" "$ALL" "A7"
-hz_assert_contains "wildcard select saw aircraft A8" "$ALL" "A8"
-hz_assert_contains "wildcard select saw aircraft A9" "$ALL" "A9"
+hz_assert_contains "exact-key subscription received this run's A7" "$(hz_sub_events one)" "$RUN"
+hz_assert_contains "wildcard subscription saw aircraft A7" "$(hz_sub_events all)" "A7"
+hz_assert_contains "wildcard subscription saw aircraft A8" "$(hz_sub_events all)" "A8"
+hz_assert_contains "wildcard subscription saw aircraft A9" "$(hz_sub_events all)" "A9"
 hz_done

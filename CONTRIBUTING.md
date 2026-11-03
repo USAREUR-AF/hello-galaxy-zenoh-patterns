@@ -22,7 +22,7 @@ Thank you for working on goat. This page is the whole process; nothing else is r
 |---|---|
 | a driver or the library | `shellcheck -x -S warning lib/hello-zenoh.sh bin/hello-zenoh patterns/*/run.sh` |
 | the control-priority probe | `cd patterns/control-priority && python3 test_probe.py` (needs `eclipse-zenoh==1.9.0`) |
-| a pattern's behaviour | run it with `bin/hello-zenoh <pattern>` against a goatnet you can write to |
+| a pattern's behaviour | run it with `bin/hello-zenoh <pattern>` against a goatnet where you have a write-capable identity |
 
 CI runs the first two. The third needs a goatnet; say in the pull request which one you ran it on.
 

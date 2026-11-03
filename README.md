@@ -107,11 +107,13 @@ you chose (the goat CLI's active context by default; `--env <context>` picks
 another).
 
 **What needs a goatnet.** Patterns A–E and the TLS/QUIC transport demo publish
-to a running fabric, so they need a goatnet and a write-capable identity on it.
-If you don't have one, the goatlite tutorial stands one up on a single box:
-[`docs/tutorials/00-goatlite.md`](https://github.com/usareur-af/goatcore/blob/main/docs/tutorials/00-goatlite.md)
-in goatcore. Without a goatnet you can still read every runbook and run the
-offline checks:
+to a running fabric, so they need a goatnet you have access to and a
+write-capable identity on it. Any appropriate goatnet works:
+EFDI, the shared sandbox goatnet that partners are onboarded to (if you are onboarded to it); <!-- oss-allow: operator-approved public example goatnet -->
+a goatlite you stand up yourself on a single box (goatcore's
+[`docs/tutorials/00-goatlite.md`](https://github.com/usareur-af/goatcore/blob/main/docs/tutorials/00-goatlite.md));
+or another goatnet you have access to. Without a goatnet you can still read
+every runbook and run the offline checks:
 
 ```bash
 bash -n lib/hello-zenoh.sh bin/hello-zenoh patterns/*/run.sh   # syntax

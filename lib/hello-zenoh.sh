@@ -85,6 +85,43 @@ hz_settle() {
   sleep "$secs"
 }
 
+# --- live subscription (what any participant may do) ------------------------
+# hz_sub_start <key-expr> <count> <name>
+#   Start `goat sub <key-expr> --count <count> --for 45s` in the background, its
+#   stdout (one line per event: key + payload) in $HZ_TMP/<name>.out and stderr in
+#   $HZ_TMP/<name>.err. Returns once goat says it is listening (or after 15 s), so a
+#   publish that follows cannot outrun the subscription.
+HZ_TMP="${HZ_TMP:-$(mktemp -d "${TMPDIR:-/tmp}/hello-zenoh.XXXXXX")}"
+HZ_SUB_PIDS=()
+hz_sub_start() {
+  local expr="$1" count="$2" name="$3"
+  : > "$HZ_TMP/$name.out"; : > "$HZ_TMP/$name.err"
+  hz_goat sub "$expr" --count "$count" --for 45s >"$HZ_TMP/$name.out" 2>"$HZ_TMP/$name.err" &
+  HZ_SUB_PIDS+=("$!")
+  for _ in $(seq 1 30); do
+    grep -q "listening on" "$HZ_TMP/$name.err" 2>/dev/null && break
+    sleep 0.5
+  done
+  sleep 1   # let the subscription propagate to the router before anyone publishes
+}
+# hz_sub_wait — wait for every background subscription to reach its count (or its
+# 45 s deadline).
+hz_sub_wait() {
+  local p
+  for p in ${HZ_SUB_PIDS[@]+"${HZ_SUB_PIDS[@]}"}; do wait "$p" 2>/dev/null; done
+  HZ_SUB_PIDS=()
+}
+# hz_sub_output <name> — what a background subscription printed (stdout then stderr).
+hz_sub_output() { cat "$HZ_TMP/$1.out" "$HZ_TMP/$1.err" 2>/dev/null; }
+# hz_sub_events <name> — only the events (stdout): what assertions check.
+hz_sub_events() { cat "$HZ_TMP/$1.out" 2>/dev/null; }
+hz_sub_cleanup() {
+  local p
+  for p in ${HZ_SUB_PIDS[@]+"${HZ_SUB_PIDS[@]}"}; do kill "$p" 2>/dev/null; done
+  rm -rf "$HZ_TMP"
+}
+trap hz_sub_cleanup EXIT
+
 # --- presentation -----------------------------------------------------------
 if [ -t 1 ] && [ "${NO_COLOR:-}" = "" ]; then
   C_RESET=$'\033[0m'; C_BOLD=$'\033[1m'; C_DIM=$'\033[2m'
@@ -139,9 +176,20 @@ hz_assert_lacks() {
     printf '    %s✓%s %s\n' "$C_GREEN" "$C_RESET" "$what"
   fi
 }
+# hz_skip "<what>" "<why>" — an assertion this context cannot check. Neither a pass
+# nor a failure; hz_done reports how many were skipped.
+HZ_SKIPS=0
+hz_skip() {
+  printf '    %s-%s SKIP %s (%s)\n' "$C_DIM" "$C_RESET" "$1" "$2"
+  HZ_SKIPS=$((HZ_SKIPS + 1))
+}
 hz_done() {
   if [ "$HZ_FAILS" -eq 0 ]; then
-    printf '\n%s%s✓ pattern complete — every assertion held.%s\n' "$C_BOLD" "$C_GREEN" "$C_RESET"
+    if [ "$HZ_SKIPS" -gt 0 ]; then
+      printf '\n%s%s✓ pattern complete — every checked assertion held; %d skipped.%s\n' "$C_BOLD" "$C_GREEN" "$HZ_SKIPS" "$C_RESET"
+    else
+      printf '\n%s%s✓ pattern complete — every assertion held.%s\n' "$C_BOLD" "$C_GREEN" "$C_RESET"
+    fi
     return 0
   fi
   printf '\n%s%s✗ %d assertion(s) failed.%s\n' "$C_BOLD" "$C_RED" "$HZ_FAILS" "$C_RESET" >&2

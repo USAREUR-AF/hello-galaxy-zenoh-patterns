@@ -78,7 +78,7 @@ deliberate, audited act, not a side effect:
 Once the grant is enforced, a granted co-publisher's sample **lands** on the
 shared topic, an **un-granted** writer is silently **denied**, and a co-publisher
 **cannot** write another peer's single-owner root — the inviolability guarantee.
-Verify each on your goatnet by presence and absence, as
+Verify each on the goatnet you are using by presence and absence, as
 [`docs/co-publish.md`](../../docs/co-publish.md) describes.
 
 > Needs a `goat` new enough to carry `goat access co-publish`, and — to actually

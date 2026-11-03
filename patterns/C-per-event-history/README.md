@@ -50,11 +50,19 @@ retention is the clean answer.)
 
 ## What the demo shows
 
-It publishes **three distinct events** to three unique keys under one prefix,
-then replays the prefix with `goat replay <prefix>/** --since` and shows **all
-three** come back — selectable together by the `**` key expression and bounded
+It opens a live subscription on `<prefix>/**`, publishes **three distinct events**
+to three unique keys under that prefix, and shows the subscription received all
+three. Then it replays the prefix with `goat replay <prefix>/** --since` and shows
+**all three** come back — selectable together by the `**` key expression and bounded
 by the `--since` time window. Contrast with [Pattern A](../A-singleton-latest/),
 where re-using one key left only the latest in latest-value storage.
+
+**Replay needs an operator key on a goatnet.** `goat replay` reads the audit-tail,
+and a goatnet gates that read to operator keys. When goat answers that the read is
+operator-gated, the demo says so and marks the four replay assertions **SKIP** —
+neither passed nor failed. The publishes and the live subscription still run and are
+checked. The live equivalent any participant may run is
+`goat sub '<prefix>/**' --count 3`, opened before the events are published.
 
 ## Run it
 
@@ -62,6 +70,6 @@ where re-using one key left only the latest in latest-value storage.
 bin/hello-zenoh C-per-event-history
 ```
 
-> The replay path reads the audit-tail and is operator-gated on a goatnet. If you're
-> not an operator, the publishes still land; `goat sub <prefix>/** --follow` is
-> the ungated live equivalent for watching new events arrive.
+> As a participant you will see the live-subscription checks pass and the replay
+> checks reported as SKIP. A context whose key may read the audit-tail runs the
+> four replay checks as well.
