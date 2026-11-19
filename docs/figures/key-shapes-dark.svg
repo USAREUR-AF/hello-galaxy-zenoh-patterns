@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 462" width="880" height="462" role="img" aria-label="Four Zenoh patterns: A, one fixed key, get returns the latest value only; B, the entity id as the last key segment, get returns one entity or all; C, an event id as the last segment on a stored prefix, get replays every event in a time range; D, the volatile class, routed live and never stored, so get returns nothing."><style>svg{--ink:#e7e9ec; --quiet:#a5acb7; --rule:#30363e; --line:#7b8592; --paper:#121417; --panel:#1a1d21; --accent:#6cc3da; --accent-soft:#14303a; --on-accent:#121417; --good:#6fc480; --good-bg:#1b2e20; --warn:#e2b04e; --warn-bg:#32291a; --info:#86b3ea; --info-bg:#1a2636; --crit:#f08b80; --crit-bg:#3a1f1f; --mute:#9ba2ac; --mute-bg:#24262b; font-family:'Helvetica Neue',Helvetica,Arial,'Liberation Sans',sans-serif}
+.t{fill:var(--ink)} .tq{fill:var(--quiet)} .ta{fill:var(--accent)} .tg{fill:var(--good)}
+.tw{fill:var(--warn)} .ti{fill:var(--info)} .tc{fill:var(--crit)} .tm{fill:var(--mute)} .ton{fill:var(--on-accent)}
+.bx{fill:var(--paper);stroke:var(--line);stroke-width:1.25} .bxp{fill:var(--panel);stroke:var(--rule);stroke-width:1.25}
+.bxa{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.25} .bxg{fill:var(--good-bg);stroke:var(--good);stroke-width:1.25}
+.bxw{fill:var(--warn-bg);stroke:var(--warn);stroke-width:1.25} .bxi{fill:var(--info-bg);stroke:var(--info);stroke-width:1.25}
+.bxc{fill:var(--crit-bg);stroke:var(--crit);stroke-width:1.25} .bxm{fill:var(--mute-bg);stroke:var(--mute);stroke-width:1.25}
+.bxd{fill:var(--paper);stroke:var(--line);stroke-width:1.25;stroke-dasharray:5 4}
+.bxz{fill:none;stroke:var(--accent);stroke-width:1.25;stroke-dasharray:6 4}
+.ln{stroke:var(--line);stroke-width:1.5;fill:none} .lna{stroke:var(--accent);stroke-width:2.25;fill:none}
+.lng{stroke:var(--good);stroke-width:2;fill:none} .lnw{stroke:var(--warn);stroke-width:2;fill:none}
+.lnc{stroke:var(--crit);stroke-width:2;fill:none} .lnx{stroke:var(--crit);stroke-width:2;fill:none;stroke-dasharray:4 5}
+.lnd{stroke:var(--line);stroke-width:1.25;fill:none;stroke-dasharray:6 5} .lnr{stroke:var(--rule);stroke-width:1;fill:none}
+.fa{fill:var(--accent)} .fg{fill:var(--good)} .fl{fill:var(--line)} .fw{fill:var(--warn)} .fi{fill:var(--info)}
+.fc{fill:var(--crit)} .fm{fill:var(--mute)} .fp{fill:var(--panel)} .fs{fill:var(--accent-soft)} .fpaper{fill:var(--paper)}
+.mono{font-family:Menlo,Consolas,'Liberation Mono',monospace}
+</style>
+<text x="24" y="38" class="t" font-size="20" font-weight="700" data-role="title">The key's shape and the storage behind it decide what get returns</text>
+<text x="24" y="66" class="tq" font-size="15">Zenoh is pub/sub, a channel, not a bucket: retrieval is a separate get, answered by a storage.</text>
+<text x="36" y="106" class="tq" font-size="14" font-weight="700">pattern</text>
+<text x="300" y="106" class="tq" font-size="14" font-weight="700">key shape</text>
+<text x="576" y="106" class="tq" font-size="14" font-weight="700">get gives you</text>
+<rect x="20" y="120" width="840" height="68" rx="8" class="bx"/>
+<circle cx="48" cy="144" r="15" class="fa"/>
+<text x="48" y="148.6" class="ton" font-size="13" text-anchor="middle" font-weight="700">A</text>
+<text x="72" y="149" class="t" font-size="14" font-weight="700">singleton / latest</text>
+<text x="72" y="170" class="tq" font-size="14">one value, current state</text>
+<text x="300" y="149" class="t mono" font-size="14">&lt;a&gt;/.../state</text>
+<text x="576" y="149" class="t" font-size="14">the latest value (only)</text>
+<rect x="576" y="161" width="14" height="14" rx="3" class="fa"/>
+<rect x="20" y="198" width="840" height="68" rx="8" class="bx"/>
+<circle cx="48" cy="222" r="15" class="fa"/>
+<text x="48" y="226.6" class="ton" font-size="13" text-anchor="middle" font-weight="700">B</text>
+<text x="72" y="227" class="t" font-size="14" font-weight="700">per-entity state</text>
+<text x="72" y="248" class="tq" font-size="14">N things, current state each</text>
+<text x="300" y="227" class="t mono" font-size="14">&lt;a&gt;/.../v1/<tspan class="ta" font-weight="700">&lt;entity-id&gt;</tspan></text>
+<text x="576" y="227" class="t" font-size="14">one entity, or all via *</text>
+<rect x="576" y="239" width="14" height="14" rx="3" class="fa"/>
+<rect x="598" y="239" width="14" height="14" rx="3" class="fa"/>
+<rect x="620" y="239" width="14" height="14" rx="3" class="fa"/>
+<rect x="642" y="239" width="14" height="14" rx="3" class="fa"/>
+<rect x="20" y="276" width="840" height="68" rx="8" class="bx"/>
+<circle cx="48" cy="300" r="15" class="fa"/>
+<text x="48" y="304.6" class="ton" font-size="13" text-anchor="middle" font-weight="700">C</text>
+<text x="72" y="305" class="t" font-size="14" font-weight="700">per-event history</text>
+<text x="72" y="326" class="tq" font-size="14">every message matters</text>
+<text x="300" y="305" class="t mono" font-size="14">&lt;a&gt;/.../v1/<tspan class="ta" font-weight="700">&lt;event-id&gt;</tspan></text>
+<text x="576" y="305" class="t" font-size="14">every event via ** + time range</text>
+<rect x="576" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="587" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="598" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="609" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="620" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="631" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="642" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="653" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="664" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="675" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="686" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="697" y="317" width="8" height="14" rx="2" class="fa"/>
+<rect x="20" y="354" width="840" height="68" rx="8" class="bx"/>
+<circle cx="48" cy="378" r="15" class="fa"/>
+<text x="48" y="382.6" class="ton" font-size="13" text-anchor="middle" font-weight="700">D</text>
+<text x="72" y="383" class="t" font-size="14" font-weight="700">volatile stream</text>
+<text x="72" y="404" class="tq" font-size="14">live firehose, no retrieval</text>
+<text x="300" y="383" class="t mono" font-size="14">volatile/&lt;a&gt;/stream/**</text>
+<text x="576" y="383" class="t" font-size="14">nothing — by design</text>
+<rect x="576" y="395" width="96" height="14" rx="3" class="bxd"/>
+<text x="20" y="448" class="tq" font-size="14">Highlighted: the segment that tells entities or events apart. Pattern E (advanced) adds a multi-writer namespace.</text>
+</svg>
