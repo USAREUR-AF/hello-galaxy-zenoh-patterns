@@ -1,5 +1,10 @@
 # hello-galaxy: Zenoh patterns
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/figures/key-shapes-dark.svg">
+  <img src="docs/figures/key-shapes-light.svg" width="760" alt="Four Zenoh patterns: A, one fixed key, get returns the latest value only; B, the entity id as the last key segment, get returns one entity or all; C, an event id as the last segment on a stored prefix, get replays every event in a time range; D, the volatile class, routed live and never stored, so get returns nothing.">
+</picture>
+
 **The right way to shape Zenoh keys, choose storage, and decide whether a single
 topic is the answer — shown, not told, on a running goat fabric.**
 
